@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f9fafb;
+            /* Tailwind's gray-100 */
+        }
+    </style>
+</head>
+
+<body class="flex items-center justify-center h-screen">
+    <div class="bg-white shadow-md rounded-lg p-6 w-96">
+        <h1 class="text-2xl font-bold mb-4 text-center">To-Do List</h1>
+        <input type="text" id="taskInput" placeholder="Add a new task"
+            class="border border-gray-300 p-2 w-full rounded mb-4">
+        <button id="addTaskBtn" class="bg-blue-500 text-white p-2 rounded w-full">Add Task</button>
+        <ul id="taskList" class="mt-4">
+            <!-- Task items will be appended here -->
+        </ul>
+    </div>
+
+    <script>
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskList = document.getElementById('taskList');
+
+        // Function to fetch and display all tasks
+        async function fetchTasks() {
+            const response = await fetch('http://localhost:8080/todos');
+            const todos = await response.json();
+            todos.forEach(todo => {
+                appendTaskToList(todo);
+            });
+        }
+
+        // Function to add a new task
+        async function addTask() {
+            const taskText = taskInput.value.trim();
+            if (taskText === '') {
+                alert('Please enter a task!');
+                return;
+            }
+
+            const response = await fetch('http://localhost:8080/todos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content: taskText }),
+            });
+
+            const newTask = await response.json();
+            appendTaskToList(newTask);
+            taskInput.value = '';
+        }
+
+        // Function to append a task to the list
+        function appendTaskToList(todo) {
+            const listItem = document.createElement('li');
+            listItem.className = 'flex justify-between items-center bg-gray-100 p-2 rounded mb-2';
+            listItem.innerHTML = `
+                <span>${todo.content}</span>
+                <button class="text-red-500" onclick="removeTask('${todo._id}', this)">Remove</button>
+            `;
+
+            console.log(todo);
+
+            taskList.appendChild(listItem);
+        }
+
+        // Function to remove a task
+        async function removeTask(id, button) {
+            await fetch(`http://localhost:8080/todos/${id}`, {
+                method: 'DELETE',
+            });
+
+            const listItem = button.parentElement;
+            taskList.removeChild(listItem);
+        }
+
+        // Add event listener to the button
+        addTaskBtn.addEventListener('click', addTask);
+
+        // Allow pressing Enter to add a task
+        taskInput.addEventListener('keypress', function (event) {
+            if (event.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // Fetch tasks on page load
+        fetchTasks();
+    </script>
+</body>
+
+</html>
