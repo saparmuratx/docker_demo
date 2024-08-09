@@ -1,0 +1,6 @@
+ME_CONFIG_MONGODB_URL=mongodb://username:password@hostname:portnumber
+ME_CONFIG_BASICAUTH_USERNAME=username
+ME_CONFIG_BASICAUTH_PASSWORD=password
+
+# default port number 27017
+# hostname is service name in docker-compose.yaml

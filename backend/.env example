@@ -1,0 +1,1 @@
+MONGODB_CONNECTION_STRING=mongodb://user:password@hostname:27017
